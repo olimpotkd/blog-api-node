@@ -13,6 +13,8 @@ require("./config/dbConnect");
 const app = express();
 
 //middlewares
+app.use(express.json());
+
 //-------
 //routes
 //-------

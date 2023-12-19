@@ -7,6 +7,7 @@ const {
   updateUser,
   getAllUsers,
 } = require("../controllers/usersController");
+const isLoggedIn = require("../middlewares/isLoggedIn");
 
 const usersRoutes = express.Router();
 
@@ -19,8 +20,8 @@ usersRoutes.post("/register", registerUser);
 usersRoutes.post("/login", login);
 
 //GET user profile
-// /api/v1/users/profile/:id
-usersRoutes.get("/profile/:id", getUserProfile);
+// /api/v1/users/profile/
+usersRoutes.get("/profile/", isLoggedIn, getUserProfile);
 
 //DELETE users
 // /api/v1/users/:id

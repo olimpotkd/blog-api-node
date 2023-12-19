@@ -1,8 +1,34 @@
+const User = require("../model/User");
+const bcrypt = require("bcryptjs");
+const { generateToken, getTokenFromHeader } = require("../util/jwtUtility");
+
 const registerUser = async (req, res) => {
+  const { firstName, lastName, profilePhoto, email, password } = req.body;
+
   try {
+    //Check if email exists
+    const userFound = await User.findOne({ email });
+    if (userFound) {
+      return res.json({
+        msg: "User already exists",
+      });
+    }
+
+    //hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    //Create user
+    const user = await User.create({
+      firstName,
+      lastName,
+      email,
+      password: hashedPassword,
+    });
+
     res.json({
       status: "success",
-      data: "User registered",
+      data: user,
     });
   } catch (error) {
     res.json(error.message);
@@ -10,10 +36,28 @@ const registerUser = async (req, res) => {
 };
 
 const login = async (req, res) => {
+  const { email, password } = req.body;
+
   try {
+    //Check if email exists, and check for valid password
+    const user = await User.findOne({ email });
+    const passwordMatched = await bcrypt.compare(password, user.password);
+
+    if (!(user && passwordMatched)) {
+      return res.json({
+        msg: "Wrong email or password",
+      });
+    }
+
     res.json({
       status: "success",
-      data: "user login refactor",
+      data: {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        isAdmin: user.isAdmin,
+        token: generateToken(user._id),
+      },
     });
   } catch (error) {
     res.json(error.message);
@@ -22,9 +66,11 @@ const login = async (req, res) => {
 
 const getUserProfile = async (req, res) => {
   try {
+    const user = await User.findById(req.authUserId);
+
     res.json({
       status: "success",
-      data: "Profile route",
+      data: user,
     });
   } catch (error) {
     res.json(error.message);
