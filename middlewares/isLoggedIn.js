@@ -1,3 +1,4 @@
+const errorHandler = require("../util/errorHandlingUtility");
 const { getTokenFromHeader, verifyToken } = require("../util/jwtUtility");
 
 const isLoggedIn = (req, res, next) => {
@@ -8,9 +9,7 @@ const isLoggedIn = (req, res, next) => {
   const decodedUser = verifyToken(token);
 
   if (!decodedUser.id) {
-    return res.json({
-      message: "Invalid/Expired token, please login back",
-    });
+    return next(errorHandler("Invalid/Expired token, please login back", 500));
   } else {
     //Save the userId to the request object, which will be used in the next middleware
     req.authUserId = decodedUser.id;

@@ -1,17 +1,16 @@
 const User = require("../model/User");
 const bcrypt = require("bcryptjs");
 const { generateToken, getTokenFromHeader } = require("../util/jwtUtility");
+const errorHandler = require("../util/errorHandlingUtility");
 
-const registerUser = async (req, res) => {
+const registerUser = async (req, res, next) => {
   const { firstName, lastName, profilePhoto, email, password } = req.body;
 
   try {
     //Check if email exists
     const userFound = await User.findOne({ email });
     if (userFound) {
-      return res.json({
-        msg: "User already exists",
-      });
+      return next(errorHandler("User already exists", 500));
     }
 
     //hash password
@@ -31,7 +30,7 @@ const registerUser = async (req, res) => {
       data: user,
     });
   } catch (error) {
-    res.json(error.message);
+    next(errorHandler(error.message));
   }
 };
 

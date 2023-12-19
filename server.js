@@ -4,6 +4,7 @@ const userRouter = require("./routes/usersRoutes");
 const postsRoutes = require("./routes/postsRoutes");
 const commentsRoutes = require("./routes/commentsRoutes");
 const categoriesRoutes = require("./routes/categoriesRoutes");
+const globalErrorHandler = require("./middlewares/globalErrorHandler");
 
 //dotenv allows for use of the .env file
 dotenv.config();
@@ -32,6 +33,14 @@ app.use("/api/v1/comments", commentsRoutes);
 app.use("/api/v1/categories", categoriesRoutes);
 
 //error handler middleware
+app.use(globalErrorHandler);
+
+//404 error
+app.use("*", (req, res) => {
+  res.status(400).json({
+    message: `${req.originalUrl} - Route Not Found`,
+  });
+});
 
 //listen to server
 const PORT = process.env.PORT || 3000;
