@@ -1,4 +1,4 @@
-const errorHandler = require("../util/errorHandlingUtility");
+const errorHandler = require("../util/errorHandler");
 const { getTokenFromHeader, verifyToken } = require("../util/jwtUtility");
 
 const isLoggedIn = (req, res, next) => {

@@ -1,4 +1,4 @@
-const globalErrorHandler = (err, req, res, next) => {
+const wrongURLErrorHandler = (err, req, res, next) => {
   const { stack, message } = err;
   const status = err.status ? err.status : "failed";
   const statusCode = err.statusCode ? err.statusCode : 500;
@@ -6,4 +6,4 @@ const globalErrorHandler = (err, req, res, next) => {
   res.status(statusCode).json({ message, stack, status });
 };
 
-module.exports = globalErrorHandler;
+module.exports = wrongURLErrorHandler;

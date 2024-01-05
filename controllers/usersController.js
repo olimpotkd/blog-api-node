@@ -1,7 +1,9 @@
 const User = require("../model/User");
 const bcrypt = require("bcryptjs");
 const { generateToken, getTokenFromHeader } = require("../util/jwtUtility");
-const errorHandler = require("../util/errorHandlingUtility");
+
+const AWSProfilePicUpload = require("../util/AWSUtility");
+const errorHandler = require("../util/errorHandler");
 
 const registerUser = async (req, res, next) => {
   const { firstName, lastName, profilePhoto, email, password } = req.body;
@@ -98,6 +100,51 @@ const updateUser = async (req, res) => {
   }
 };
 
+//Profile Photo Upload
+const profilePhotoUpload = async (req, res, next) => {
+  try {
+    //1. Find user
+    const userToUpdate = await User.findById(req.authUserId);
+
+    //2. Check if user is found
+    if (!userToUpdate) {
+      return next(errorHandler("User not found", 403));
+    }
+
+    //3. Check if user is blocked
+    if (userToUpdate.isBlocked) {
+      return next(errorHandler("Action not allowed, account is blocked", 403));
+    }
+
+    //4. Check if user is updating photo
+    if (req.file) {
+      //5. Update profile photo
+      //Upload to AWS
+      const uploadResponse = await AWSProfilePicUpload(req.file);
+
+      //Update DB with picture location
+      await User.findByIdAndUpdate(
+        req.authUserId,
+        {
+          $set: {
+            profilePhoto: uploadResponse.Location,
+          },
+        },
+        { new: true }
+      );
+
+      res.json({
+        status: "sucess",
+        data: "Profile photo uploaded",
+      });
+    } else {
+      errorHandler(`Upload failed: ${uploadResponse.message}`, 500);
+    }
+  } catch (error) {
+    res.json(error.message);
+  }
+};
+
 const deleteUser = async (req, res) => {
   try {
     res.json({
@@ -116,4 +163,5 @@ module.exports = {
   getAllUsers,
   deleteUser,
   updateUser,
+  profilePhotoUpload,
 };

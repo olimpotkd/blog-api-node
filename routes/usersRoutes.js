@@ -6,8 +6,17 @@ const {
   deleteUser,
   updateUser,
   getAllUsers,
+  profilePhotoUpload,
 } = require("../controllers/usersController");
 const isLoggedIn = require("../middlewares/isLoggedIn");
+const multer = require("multer");
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024, // limit file size to 5MB
+  },
+});
 
 const usersRoutes = express.Router();
 
@@ -34,5 +43,14 @@ usersRoutes.put("/:id", updateUser);
 //GET users
 // /api/v1/users
 usersRoutes.get("/", getAllUsers);
+
+//POST user profile
+// /api/v1/users/profile-photo-upload/
+usersRoutes.post(
+  "/profile-photo-upload/",
+  isLoggedIn,
+  upload.single("profilePic"), //Call middleware, using the name of the param that contains the file
+  profilePhotoUpload
+);
 
 module.exports = usersRoutes;

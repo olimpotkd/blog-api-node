@@ -4,7 +4,7 @@ const userRouter = require("./routes/usersRoutes");
 const postsRoutes = require("./routes/postsRoutes");
 const commentsRoutes = require("./routes/commentsRoutes");
 const categoriesRoutes = require("./routes/categoriesRoutes");
-const globalErrorHandler = require("./middlewares/globalErrorHandler");
+const wrongURLErrorHandler = require("./middlewares/wrongURLErrorHandler");
 
 //dotenv allows for use of the .env file
 dotenv.config();
@@ -33,7 +33,7 @@ app.use("/api/v1/comments", commentsRoutes);
 app.use("/api/v1/categories", categoriesRoutes);
 
 //error handler middleware
-app.use(globalErrorHandler);
+app.use(wrongURLErrorHandler);
 
 //404 error
 app.use("*", (req, res) => {
