@@ -7,6 +7,9 @@ const {
   updateUser,
   getAllUsers,
   profilePhotoUpload,
+  getProfileViewers,
+  unfollow,
+  follow,
 } = require("../controllers/usersController");
 const isLoggedIn = require("../middlewares/isLoggedIn");
 const multer = require("multer");
@@ -43,6 +46,18 @@ usersRoutes.put("/:id", updateUser);
 //GET users
 // /api/v1/users
 usersRoutes.get("/", getAllUsers);
+
+//GET users
+// /api/v1/users/:id/unfollow
+usersRoutes.get("/:id/unfollow", isLoggedIn, unfollow);
+
+//GET users
+// /api/v1/users/:id/following
+usersRoutes.get("/:id/follow", isLoggedIn, follow);
+
+//GET users
+// /api/v1/users/profile-viewers
+usersRoutes.get("/:id/profile-viewers", isLoggedIn, getProfileViewers);
 
 //POST user profile
 // /api/v1/users/profile-photo-upload/

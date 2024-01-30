@@ -89,6 +89,112 @@ const getAllUsers = async (req, res) => {
   }
 };
 
+//who viewed
+const getProfileViewers = async (req, res, next) => {
+  try {
+    //1. Find the user who posted the blog entry (:id)
+    const user = await User.findById(req.params.id);
+
+    //2. Find the user who viewd the original user (the current user)
+    const currentUser = await User.findById(req.authUserId);
+
+    //3. Check if user and currentUser are found
+    if (user && currentUser) {
+      //4. Check if currentUser already viewed the user's profile.
+      const isUserAlreadyViewed = user.viewers.some((viewer) => {
+        const viewerId = viewer.toString();
+        const currentUserId = currentUser.id.toString();
+        return currentUserId === viewerId;
+      });
+
+      if (isUserAlreadyViewed) {
+        return next(errorHandler("You already viewed this profile"));
+      } else {
+        user.viewers.push(currentUser.id);
+        await user.save();
+        res.json({
+          status: "success",
+          data: "You have viewd the profile",
+        });
+      }
+    }
+  } catch (error) {
+    res.json(error.message);
+  }
+};
+
+const follow = async (req, res, next) => {
+  try {
+    //1. Find user to follow
+    const userToFollow = await User.findById(req.params.id);
+
+    //2. Get current user
+    const currentUser = await User.findById(req.authUserId);
+
+    //3. Check both
+    if (currentUser && userToFollow) {
+      //4. Check if user is already following
+      const isAlreadyFollowing = userToFollow.followers.some(
+        (follower) => follower.toString() === currentUser.id.toString()
+      );
+
+      //5. If not already following, add
+      if (isAlreadyFollowing) {
+        return next(errorHandler("You already follow this user"));
+      } else {
+        userToFollow.followers.push(currentUser.id);
+        currentUser.following.push(userToFollow.id);
+
+        await currentUser.save();
+        await userToFollow.save();
+
+        res.json({
+          status: "success",
+          data: "Now following",
+        });
+      }
+    }
+  } catch (error) {
+    res.json(error.message);
+  }
+};
+
+const unfollow = async (req, res, next) => {
+  try {
+    //1. Find user to unfollow
+    const userToUnfollow = await User.findById(req.params.id);
+
+    //2. Get current user
+    const currentUser = await User.findById(req.authUserId);
+
+    //3. Check both
+    if (currentUser && userToUnfollow) {
+      //4. Check if user is already following
+      const isAlreadyFollowing = userToUnfollow.followers.some(
+        (follower) => follower.toString() === currentUser.id.toString()
+      );
+
+      //5. If already following, remove
+      if (isAlreadyFollowing) {
+        userToUnfollow.followers.pop(currentUser.id);
+        currentUser.following.pop(userToUnfollow.id);
+
+        await currentUser.save();
+        await userToUnfollow.save();
+
+        res.json({
+          status: "success",
+          data: "You unfollowed this user",
+        });
+      } else {
+        return next(errorHandler("You don't follow this user"));
+      }
+    }
+  } catch (error) {
+    res.json(error.message);
+  }
+};
+
 const updateUser = async (req, res) => {
   try {
     res.json({
@@ -157,11 +263,14 @@ const deleteUser = async (req, res) => {
 };
 
 module.exports = {
-  registerUser,
-  login,
-  getUserProfile,
-  getAllUsers,
   deleteUser,
-  updateUser,
+  follow,
+  getAllUsers,
+  getProfileViewers,
+  getUserProfile,
+  login,
   profilePhotoUpload,
+  registerUser,
+  unfollow,
+  updateUser,
 };
