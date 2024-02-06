@@ -195,6 +195,136 @@ const unfollow = async (req, res, next) => {
   }
 };
 
+const blockUser = async (req, res, next) => {
+  try {
+    //1. Find user to block
+    const userToBlock = await User.findById(req.params.id);
+
+    //2. Get current user
+    const currentUser = await User.findById(req.authUserId);
+
+    //3. Check both
+    if (currentUser && userToBlock) {
+      //4. Check if user is already blocked
+      const isAlreadyBlocked = currentUser.blocked.some(
+        (blockedUserId) =>
+          blockedUserId.toString() === userToBlock.id.toString()
+      );
+
+      //5. If not already blocked, block
+      if (isAlreadyBlocked) {
+        return next(errorHandler("User is already blocked"));
+      } else {
+        currentUser.blocked.push(userToBlock);
+
+        await currentUser.save();
+
+        res.json({
+          status: "success",
+          data: "User is now blocked",
+        });
+      }
+    }
+  } catch (error) {
+    res.json(error.message);
+  }
+};
+
+const unblockUser = async (req, res, next) => {
+  try {
+    //1. Find user to block
+    const userToUnblock = await User.findById(req.params.id);
+
+    //2. Get current user
+    const currentUser = await User.findById(req.authUserId);
+
+    //3. Check both
+    if (currentUser && userToUnblock) {
+      //4. Check if user is already blocked
+      const isAlreadyBlocked = currentUser.blocked.some(
+        (blockedUserId) =>
+          blockedUserId.toString() === userToUnblock.id.toString()
+      );
+
+      //5. If already blocked, unblock
+      if (isAlreadyBlocked) {
+        currentUser.blocked.pop(userToUnblock);
+
+        await currentUser.save();
+
+        res.json({
+          status: "success",
+          data: "User is now unblocked",
+        });
+      } else {
+        return next(errorHandler("User is not blocked"));
+      }
+    }
+  } catch (error) {
+    res.json(error.message);
+  }
+};
+
+const adminBlockUser = async (req, res, next) => {
+  try {
+    //1. Find user to block
+    const userToBlock = await User.findById(req.params.id);
+
+    //2. Get current user
+    const currentUser = await User.findById(req.authUserId);
+
+    //3. Check both
+    if (!userToBlock) {
+      return next(errorHandler("User not found"));
+    }
+
+    if (currentUser && userToBlock) {
+      //4. Check if not already blocked, block
+      if (userToBlock.isBlocked) {
+        return next(errorHandler("User is already blocked"));
+      } else {
+        userToBlock.isBlocked = true;
+
+        await userToBlock.save();
+
+        res.json({
+          status: "success",
+          data: "User is now blocked",
+        });
+      }
+    }
+  } catch (error) {
+    res.json(error.message);
+  }
+};
+
+const adminUnblockUser = async (req, res, next) => {
+  try {
+    //1. Find user to block
+    const userToUnblock = await User.findById(req.params.id);
+
+    //2. Get current user
+    const currentUser = await User.findById(req.authUserId);
+
+    //3. Check both
+    if (!userToUnblock) {
+      return next(errorHandler("User not found"));
+    }
+
+    if (currentUser && userToUnblock) {
+      //4. Unblock
+      userToUnblock.isBlocked = false;
+      await userToUnblock.save();
+      res.json({
+        status: "success",
+        data: "User is now unblocked",
+      });
+    }
+  } catch (error) {
+    res.json(error.message);
+  }
+};
+
 const updateUser = async (req, res) => {
   try {
     res.json({
@@ -263,6 +393,9 @@ const deleteUser = async (req, res) => {
 };
 
 module.exports = {
+  adminBlockUser,
+  adminUnblockUser,
+  blockUser,
   deleteUser,
   follow,
   getAllUsers,
@@ -271,6 +404,7 @@ module.exports = {
   login,
   profilePhotoUpload,
   registerUser,
+  unblockUser,
   unfollow,
   updateUser,
 };

@@ -10,9 +10,14 @@ const {
   getProfileViewers,
   unfollow,
   follow,
+  blockUser,
+  unblockUser,
+  adminBlockUser,
+  adminUnblockUser,
 } = require("../controllers/usersController");
 const isLoggedIn = require("../middlewares/isLoggedIn");
 const multer = require("multer");
+const isAdmin = require("../middlewares/isAdmin");
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -47,13 +52,29 @@ usersRoutes.put("/:id", updateUser);
 // /api/v1/users
 usersRoutes.get("/", getAllUsers);
 
-//GET users
+//GET unfollow
 // /api/v1/users/:id/unfollow
 usersRoutes.get("/:id/unfollow", isLoggedIn, unfollow);
 
-//GET users
+//GET follow
 // /api/v1/users/:id/following
 usersRoutes.get("/:id/follow", isLoggedIn, follow);
+
+//GET block user
+// /api/v1/users/:id/block
+usersRoutes.get("/:id/block", isLoggedIn, blockUser);
+
+//GET unblock user
+// /api/v1/users/:id/unblock
+usersRoutes.get("/:id/unblock", isLoggedIn, unblockUser);
+
+//PUT block user
+// /api/v1/users/:id/adminBlock
+usersRoutes.put("/:id/adminBlock", isLoggedIn, isAdmin, adminBlockUser);
+
+//PUT unblock user
+// /api/v1/users/:id/adminUnblock
+usersRoutes.put("/:id/adminUnblock", isLoggedIn, isAdmin, adminUnblockUser);
 
 //GET users
 // /api/v1/users/profile-viewers
