@@ -80,9 +80,10 @@ const getUserProfile = async (req, res) => {
 
 const getAllUsers = async (req, res) => {
   try {
+    const users = await User.find();
     res.json({
       status: "success",
-      data: "Users route",
+      data: users,
     });
   } catch (error) {
     res.json(error.message);

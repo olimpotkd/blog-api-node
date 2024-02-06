@@ -79,8 +79,39 @@ const userSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
+    toJSON: { virtuals: true }, //Allows for virtual defined properties to be shown on querying (See below)
   }
 );
+
+//Will add mongoose virtual property. This is a prop that only exists in the code/app, but is not really defined in MongoDB.
+//Fullname
+userSchema.virtual("fullname").get(function () {
+  return `${this.firstName} ${this.lastName}`;
+});
+//Initials
+userSchema.virtual("initials").get(function () {
+  return `${this.firstName[0]}${this.lastName[0]}`;
+});
+//Post count
+userSchema.virtual("postcount").get(function () {
+  return this.posts.length;
+});
+//Followers count
+userSchema.virtual("followerscount").get(function () {
+  return this.followers.length;
+});
+//Following count
+userSchema.virtual("followingcount").get(function () {
+  return this.following.length;
+});
+//Viewer count
+userSchema.virtual("viewerscount").get(function () {
+  return this.viewers.length;
+});
+//Blocked count
+userSchema.virtual("blockedcount").get(function () {
+  return this.blocked.length;
+});
 
 //Register the user model into mongoose/mongo
 const User = mongoose.model("User", userSchema);
