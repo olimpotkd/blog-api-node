@@ -6,12 +6,13 @@ const {
   updatePost,
   deletePost,
 } = require("../controllers/postsController");
+const isLoggedIn = require("../middlewares/isLoggedIn");
 
 const postsRoutes = express.Router();
 
 //ADD post
 // /api/v1/posts/
-postsRoutes.post("/", createPost);
+postsRoutes.post("/", isLoggedIn, createPost);
 
 //GET posts
 // /api/v1/posts/

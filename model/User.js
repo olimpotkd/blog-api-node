@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const Post = require("./Post");
 
 //create schema
 const userSchema = new mongoose.Schema(
@@ -55,7 +56,7 @@ const userSchema = new mongoose.Schema(
     posts: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Post",
+        ref: "Post", //This allows for the populate method to fill this prop with data from the Post collection
       },
     ],
     blocked: [
@@ -64,13 +65,11 @@ const userSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
-    plan: [
-      {
-        type: String,
-        enum: ["Free", "Premium", "Pro"],
-        default: "Free",
-      },
-    ],
+    plan: {
+      type: String,
+      enum: ["Free", "Premium", "Pro"],
+      default: "Free",
+    },
     userAward: {
       type: String,
       enum: ["Bronze", "Silver", "Gold"],
@@ -83,7 +82,83 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-//Will add mongoose virtual property. This is a prop that only exists in the code/app, but is not really defined in MongoDB.
+//Mongoose hooks are middleware that will be executed depending on their purpose either before function
+//execution (pre hook) or after function execution (post hook)
+//This pre hook will run BEFORE any findById/findOne function gets executed
+userSchema.pre("findOne", async function (next) {
+  //Populate will fill the "posts" properties with the data from the Post collection.
+  //This will be done by mongoose, when the ref has been specified in the schema
+  //This could also be called from the controller, but here it makes more sense.
+
+  //This is breaking, moved to profile controller
+  // await this.populate("posts");
+
+  const userId = this._conditions._id;
+  const posts = await Post.find({ user: userId });
+
+  const lastPostDate = new Date(posts[posts.length - 1]?.createdAt);
+  const lastPostDateStr = lastPostDate.toDateString();
+
+  const currentDate = new Date();
+  const diffDays = (currentDate - lastPostDate) / (1000 * 3600 * 24);
+
+  // //------Last post date-------------
+  userSchema.virtual("lastPostDate").get(function () {
+    return lastPostDateStr;
+  });
+
+  //------Block if inactive for 30 days -----
+  await User.findByIdAndUpdate(
+    userId,
+    {
+      isBlocked: diffDays > 30,
+    },
+    {
+      new: true,
+    }
+  );
+
+  //-----Is Inactive---------
+  userSchema.virtual("isInactive").get(() => {
+    return diffDays > 30; // If more than 30 days, is inactive
+  });
+
+  // ----------Last Active---------
+  userSchema.virtual("lastActive").get(() => {
+    const lastActiveDays = Math.floor(diffDays);
+
+    if (lastActiveDays <= 0) {
+      return "Today";
+    } else if (lastActiveDays === 1) {
+      return "Yesterday";
+    } else {
+      return `${lastActiveDays} days ago`;
+    }
+  });
+
+  // -------Update userAwards based on number of posts--------
+  const numberOfPosts = posts.length;
+  const award =
+    numberOfPosts < 10 ? "Bronze" : numberOfPosts <= 20 ? "Silver" : "Gold";
+  await User.findByIdAndUpdate(
+    userId,
+    {
+      userAward: award,
+    },
+    { new: true }
+  );
+
+  next();
+});
+
+//post hook
+userSchema.post("save", function (next) {
+  next();
+});
+
+//Virtual properties.
+//These are properties that only exists in the code/app, but is not really defined in MongoDB.
+//
 //Fullname
 userSchema.virtual("fullname").get(function () {
   return `${this.firstName} ${this.lastName}`;

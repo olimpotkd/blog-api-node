@@ -1,12 +1,16 @@
 const User = require("../model/User");
+const Post = require("../model/Post");
+const Comment = require("../model/Comment");
+const Category = require("../model/Category");
+
 const bcrypt = require("bcryptjs");
-const { generateToken, getTokenFromHeader } = require("../util/jwtUtility");
+const { generateToken } = require("../util/jwtUtility");
 
 const AWSProfilePicUpload = require("../util/AWSUtility");
 const errorHandler = require("../util/errorHandler");
 
 const registerUser = async (req, res, next) => {
-  const { firstName, lastName, profilePhoto, email, password } = req.body;
+  const { firstName, lastName, email, password } = req.body;
 
   try {
     //Check if email exists
@@ -36,7 +40,7 @@ const registerUser = async (req, res, next) => {
   }
 };
 
-const login = async (req, res) => {
+const login = async (req, res, next) => {
   const { email, password } = req.body;
 
   try {
@@ -45,9 +49,7 @@ const login = async (req, res) => {
     const passwordMatched = await bcrypt.compare(password, user.password);
 
     if (!(user && passwordMatched)) {
-      return res.json({
-        msg: "Wrong email or password",
-      });
+      return next(errorHandler("Wrong email or password"));
     }
 
     res.json({
@@ -61,24 +63,27 @@ const login = async (req, res) => {
       },
     });
   } catch (error) {
-    res.json(error.message);
+    next(errorHandler(error.message));
   }
 };
 
-const getUserProfile = async (req, res) => {
+const getUserProfile = async (req, res, next) => {
   try {
-    const user = await User.findById(req.authUserId);
+    //Moved populate here from User model
+    const user = await User.findById(req.authUserId).populate({
+      path: "posts",
+    });
 
     res.json({
       status: "success",
       data: user,
     });
   } catch (error) {
-    res.json(error.message);
+    next(errorHandler(error.message));
   }
 };
 
-const getAllUsers = async (req, res) => {
+const getAllUsers = async (_, res, next) => {
   try {
     const users = await User.find();
     res.json({
@@ -86,7 +91,7 @@ const getAllUsers = async (req, res) => {
       data: users,
     });
   } catch (error) {
-    res.json(error.message);
+    next(errorHandler(error.message));
   }
 };
 
@@ -120,7 +125,7 @@ const getProfileViewers = async (req, res, next) => {
       }
     }
   } catch (error) {
-    res.json(error.message);
+    next(errorHandler(error.message));
   }
 };
 
@@ -156,7 +161,7 @@ const follow = async (req, res, next) => {
       }
     }
   } catch (error) {
-    res.json(error.message);
+    next(errorHandler(error.message));
   }
 };
 
@@ -192,7 +197,7 @@ const unfollow = async (req, res, next) => {
       }
     }
   } catch (error) {
-    res.json(error.message);
+    next(errorHandler(error.message));
   }
 };
 
@@ -227,7 +232,7 @@ const blockUser = async (req, res, next) => {
       }
     }
   } catch (error) {
-    res.json(error.message);
+    next(errorHandler(error.message));
   }
 };
 
@@ -262,7 +267,7 @@ const unblockUser = async (req, res, next) => {
       }
     }
   } catch (error) {
-    res.json(error.message);
+    next(errorHandler(error.message));
   }
 };
 
@@ -295,7 +300,7 @@ const adminBlockUser = async (req, res, next) => {
       }
     }
   } catch (error) {
-    res.json(error.message);
+    next(errorHandler(error.message));
   }
 };
 
@@ -322,18 +327,64 @@ const adminUnblockUser = async (req, res, next) => {
       });
     }
   } catch (error) {
-    res.json(error.message);
+    next(errorHandler(error.message));
   }
 };
 
-const updateUser = async (req, res) => {
+const updateUser = async (req, res, next) => {
+  const { email, lastName, firstName } = req.body;
   try {
+    // Check if new email is already used
+    if (email) {
+      const emailTaken = await User.findOne({ email });
+      if (emailTaken) {
+        return next(errorHandler("Email is taken", 400));
+      }
+    }
+
+    //Update user
+    const user = await User.findByIdAndUpdate(
+      req.authUserId,
+      {
+        lastName,
+        firstName,
+        email,
+      },
+      { new: true, runValidators: true }
+    );
     res.json({
       status: "success",
-      data: "Update users route",
+      data: user,
     });
   } catch (error) {
-    res.json(error.message);
+    next(errorHandler(error.message));
+  }
+};
+
+const updatePassword = async (req, res, next) => {
+  const { password } = req.body;
+
+  try {
+    //Check if user is updating the password
+    if (password) {
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
+
+      //update user
+      await User.findByIdAndUpdate(
+        req.authUserId,
+        { password: hashedPassword },
+        { new: true, runValidators: true }
+      );
+    } else {
+      return next(errorHandler("Password cannot be empty"));
+    }
+    res.json({
+      status: "success",
+      data: "Password updated",
+    });
+  } catch (error) {
+    next(errorHandler(error.message));
   }
 };
 
@@ -378,18 +429,23 @@ const profilePhotoUpload = async (req, res, next) => {
       errorHandler(`Upload failed: ${uploadResponse.message}`, 500);
     }
   } catch (error) {
-    res.json(error.message);
+    next(errorHandler(error.message));
   }
 };
 
-const deleteUser = async (req, res) => {
+const deleteUser = async (req, res, next) => {
   try {
+    await Post.deleteMany({ user: req.authUserId });
+    await Comment.deleteMany({ user: req.authUserId });
+    await Category.deleteMany({ user: req.authUserId });
+    await User.findByIdAndDelete(req.authUserId);
+
     res.json({
       status: "success",
-      data: "Delete users route",
+      data: "User account deleted",
     });
   } catch (error) {
-    res.json(error.message);
+    next(errorHandler(error.message));
   }
 };
 
@@ -408,4 +464,5 @@ module.exports = {
   unblockUser,
   unfollow,
   updateUser,
+  updatePassword,
 };

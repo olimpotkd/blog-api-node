@@ -14,6 +14,7 @@ const {
   unblockUser,
   adminBlockUser,
   adminUnblockUser,
+  updatePassword,
 } = require("../controllers/usersController");
 const isLoggedIn = require("../middlewares/isLoggedIn");
 const multer = require("multer");
@@ -37,8 +38,12 @@ usersRoutes.post("/register", registerUser);
 usersRoutes.post("/login", login);
 
 //GET user profile
-// /api/v1/users/profile/
+// /api/v1/users/profile
 usersRoutes.get("/profile/", isLoggedIn, getUserProfile);
+
+//UPDATE password
+// /api/v1/users/update-password
+usersRoutes.put("/update-password", isLoggedIn, updatePassword);
 
 //DELETE users
 // /api/v1/users/:id
@@ -46,7 +51,7 @@ usersRoutes.delete("/:id", deleteUser);
 
 //UPDATE user
 // /api/v1/users/:id
-usersRoutes.put("/:id", updateUser);
+usersRoutes.put("/", isLoggedIn, updateUser);
 
 //GET users
 // /api/v1/users
@@ -79,6 +84,10 @@ usersRoutes.put("/:id/adminUnblock", isLoggedIn, isAdmin, adminUnblockUser);
 //GET users
 // /api/v1/users/profile-viewers
 usersRoutes.get("/:id/profile-viewers", isLoggedIn, getProfileViewers);
+
+//DELETE user
+// /api/v1/users/:id
+usersRoutes.delete("/", isLoggedIn, deleteUser);
 
 //POST user profile
 // /api/v1/users/profile-photo-upload/
