@@ -1,55 +1,71 @@
-const createCategory = async (req, res) => {
+const Category = require("../model/Category");
+const errorHandler = require("../util/errorHandler");
+
+const createCategory = async (req, res, next) => {
+  const { title } = req.body;
   try {
+    const category = await Category.create({ title, user: req.authUserId });
     res.json({
       status: "success",
-      data: "Create category route",
+      data: category,
     });
   } catch (error) {
-    res.json(error.message);
+    return next(errorHandler(error.message));
   }
 };
 
-const getCategory = async (req, res) => {
+const getCategory = async (req, res, next) => {
+  const category = await Category.findById(req.params.id);
   try {
     res.json({
       status: "success",
-      data: "Get single category route",
+      data: category,
     });
   } catch (error) {
-    res.json(error.message);
+    return next(errorHandler(error.message));
   }
 };
 
-const getAllCategories = async (req, res) => {
+const getAllCategories = async (_, res, next) => {
+  const categories = await Category.find();
+
   try {
     res.json({
       status: "success",
-      data: "Get all categories route",
+      data: categories,
     });
   } catch (error) {
-    res.json(error.message);
+    return next(errorHandler(error.message));
   }
 };
 
-const deleteCategory = async (req, res) => {
+const deleteCategory = async (req, res, next) => {
   try {
+    await Category.findByIdAndDelete(req.params.id);
     res.json({
       status: "success",
-      data: "Delete category route",
+      data: "Category deleted",
     });
   } catch (error) {
-    res.json(error.message);
+    return next(errorHandler(error.message));
   }
 };
 
-const updateCategory = async (req, res) => {
+const updateCategory = async (req, res, next) => {
+  const category = await Category.findByIdAndUpdate(
+    req.params.id,
+    {
+      title: req.body.title,
+    },
+    { new: true, runValidators: true }
+  );
   try {
     res.json({
       status: "success",
-      data: "Update category route",
+      data: category,
     });
   } catch (error) {
-    res.json(error.message);
+    return next(errorHandler(error.message));
   }
 };
 
