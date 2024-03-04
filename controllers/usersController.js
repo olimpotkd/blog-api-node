@@ -6,11 +6,12 @@ const Category = require("../model/Category");
 const bcrypt = require("bcryptjs");
 const { generateToken } = require("../util/jwtUtility");
 
-const AWSProfilePicUpload = require("../util/AWSUtility");
+const AWSFileUpload = require("../util/AWSUtility");
 const errorHandler = require("../util/errorHandler");
+const AWSDirectories = require("../util/constants");
 
 const registerUser = async (req, res, next) => {
-  const { firstName, lastName, email, password } = req.body;
+  const { firstName, lastName, email, password, isAdmin } = req.body;
 
   try {
     //Check if email exists
@@ -29,6 +30,7 @@ const registerUser = async (req, res, next) => {
       lastName,
       email,
       password: hashedPassword,
+      isAdmin: isAdmin,
     });
 
     res.json({
@@ -408,7 +410,11 @@ const profilePhotoUpload = async (req, res, next) => {
     if (req.file) {
       //5. Update profile photo
       //Upload to AWS
-      const uploadResponse = await AWSProfilePicUpload(req.file);
+      const uploadResponse = await AWSFileUpload(
+        req.file,
+        userToUpdate.id.toString(),
+        AWSDirectories.profilePhotos
+      );
 
       //Update DB with picture location
       await User.findByIdAndUpdate(

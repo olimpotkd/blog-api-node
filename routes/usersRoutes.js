@@ -92,9 +92,9 @@ usersRoutes.delete("/", isLoggedIn, deleteUser);
 //POST user profile
 // /api/v1/users/profile-photo-upload/
 usersRoutes.post(
-  "/profile-photo-upload/",
+  "/profile-photo-upload",
   isLoggedIn,
-  upload.single("profilePic"), //Call middleware, using the name of the param that contains the file
+  upload.single("profilePhoto"), //Call middleware, using the name of the param that contains the file
   profilePhotoUpload
 );
 

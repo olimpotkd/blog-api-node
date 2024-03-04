@@ -151,11 +151,6 @@ userSchema.pre("findOne", async function (next) {
   next();
 });
 
-//post hook
-userSchema.post("save", function (next) {
-  next();
-});
-
 //Virtual properties.
 //These are properties that only exists in the code/app, but is not really defined in MongoDB.
 //

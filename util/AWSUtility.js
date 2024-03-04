@@ -2,10 +2,15 @@ const AWS = require("aws-sdk");
 
 /**
  * Uploads a picture file to AWS
- * @param {object} file
+ * @param {object} file File to be uploaded
+ * @param {string} fileName Name of the file when uploaded
+ * @param {string} route Directory where the file will be uploaded to
  * @returns {object}
  */
-const AWSProfilePicUpload = (file) => {
+const AWSFileUpload = (file, fileName, route) => {
+  const fileExtension = file.originalname.split(".")[1];
+  const key = `${route}${fileName}.${fileExtension}`;
+
   //gets the credentials from the shared config file from sdk
   var awsCredentials = new AWS.SharedIniFileCredentials({
     profile: "default",
@@ -18,7 +23,7 @@ const AWSProfilePicUpload = (file) => {
 
   const uploadParams = {
     Bucket: process.env.BUCKET,
-    Key: `profilePics/${file.originalname}`,
+    Key: key,
     Body: file.buffer,
     ContentType: file.mimetype,
   };
@@ -26,4 +31,4 @@ const AWSProfilePicUpload = (file) => {
   return s3.upload(uploadParams).promise();
 };
 
-module.exports = AWSProfilePicUpload;
+module.exports = AWSFileUpload;

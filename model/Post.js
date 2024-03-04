@@ -15,9 +15,9 @@ const postSchema = new mongoose.Schema(
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
-      // required: [true, "Post category is required"],
+      required: [true, "Post category is required"],
     },
-    numViews: [
+    viewers: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
@@ -47,8 +47,47 @@ const postSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
+    toJSON: { virtuals: true }, //Allows for virtual defined properties to be shown on querying (See below)
   }
 );
+
+postSchema.pre("findOne", async function (next) {});
+
+//Viewers count
+postSchema.virtual("viewersCount").get(function () {
+  return this.viewers.length;
+});
+//Likes count
+postSchema.virtual("likesCount").get(function () {
+  return this.likes.length;
+});
+//Dislikes count
+postSchema.virtual("dislikesCount").get(function () {
+  return this.dislikes.length;
+});
+//Likes percentage
+postSchema.virtual("likesPercentage").get(function () {
+  const post = this;
+  const sum = parseInt(post.likes.length) + parseInt(post.dislikes.length);
+  return (post.likes.length / sum) * 100;
+});
+//Dislikes percentage
+postSchema.virtual("dislikesPercentage").get(function () {
+  const post = this;
+  const sum = parseInt(post.likes.length) + parseInt(post.dislikes.length);
+  return (post.dislikes.length / sum) * 100;
+});
+//Days ago
+postSchema.virtual("daysAgo").get(function () {
+  const post = this;
+  const date = new Date(post.createdAt);
+  const daysAgo = Math.floor((Date.now() - date) / 86400000);
+  return daysAgo === 0
+    ? "Today"
+    : daysAgo === 1
+    ? "Yesterday"
+    : `${daysAgo} days ago`;
+});
 
 //Register the post model into mongoose/mongo
 const Post = mongoose.model("Post", postSchema);
