@@ -8,9 +8,9 @@ const commentSchema = new mongoose.Schema(
       required: [true, "Post is required"],
     },
     user: { type: Object, required: [true, "User is required"] },
-    description: {
+    text: {
       type: String,
-      required: [true, "Comment description is required"],
+      required: [true, "Comment text is required"],
     },
   },
   { timestamps: true }

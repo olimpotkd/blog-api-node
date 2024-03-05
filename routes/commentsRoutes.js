@@ -11,7 +11,7 @@ const commentsRoutes = express.Router();
 
 //ADD comment
 // /api/v1/comments
-commentsRoutes.post("/", createComment);
+commentsRoutes.post("/", isLoggedIn, createComment);
 
 //GET single comment
 // /api/v1/comments/:id
@@ -23,10 +23,10 @@ commentsRoutes.get("/", getAllComments);
 
 //DELETE comments
 // /api/v1/comments/:id
-commentsRoutes.delete("/:id", deleteComment);
+commentsRoutes.delete("/:id", isLoggedIn, deleteComment);
 
 //UPDATE comments
 // /api/v1/comments/:id
-commentsRoutes.put("/:id", updateComment);
+commentsRoutes.put("/:id", isLoggedIn, updateComment);
 
 module.exports = commentsRoutes;

@@ -59,6 +59,12 @@ const userSchema = new mongoose.Schema(
         ref: "Post", //This allows for the populate method to fill this prop with data from the Post collection
       },
     ],
+    comments: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Comment",
+      },
+    ],
     blocked: [
       {
         type: mongoose.Schema.Types.ObjectId,
