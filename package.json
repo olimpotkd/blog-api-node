@@ -2,10 +2,11 @@
   "name": "blog-api",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/server.js",
   "scripts": {
-    "start": "node server.js",
-    "watch": "node --watch server.js"
+    "build": "npx tsc",
+    "start": "node dist/server.js",
+    "dev": "nodemon ./server.ts"
   },
   "keywords": [
     "Node",
@@ -17,12 +18,17 @@
   "author": "Carlos Reynoso",
   "license": "ISC",
   "dependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.11.25",
     "aws-sdk": "^2.1524.0",
     "bcryptjs": "^2.4.3",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.0.1",
-    "multer": "^1.4.5-lts.1"
+    "multer": "^1.4.5-lts.1",
+    "nodemon": "^3.1.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.2"
   }
 }

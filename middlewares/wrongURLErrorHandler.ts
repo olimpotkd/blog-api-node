@@ -1,4 +1,11 @@
-const wrongURLErrorHandler = (err, req, res, next) => {
+import { Request, Response, NextFunction } from "express";
+
+const wrongURLErrorHandler = (
+  err: any,
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const { stack, message } = err;
   const status = err.status ? err.status : "failed";
   const statusCode = err.statusCode ? err.statusCode : 500;
@@ -6,4 +13,4 @@ const wrongURLErrorHandler = (err, req, res, next) => {
   res.status(statusCode).json({ message, stack, status });
 };
 
-module.exports = wrongURLErrorHandler;
+export default wrongURLErrorHandler;
