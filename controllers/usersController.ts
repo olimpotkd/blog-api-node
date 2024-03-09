@@ -1,16 +1,22 @@
-const User = require("../model/User");
-const Post = require("../model/Post");
-const Comment = require("../model/Comment");
-const Category = require("../model/Category");
+import { Request, Response, NextFunction, Errback } from "express";
+import User from "../model/User";
+import Post from "../model/Post";
+import Comment from "../model/Comment";
+import Category from "../model/Category";
 
-const bcrypt = require("bcryptjs");
-const { generateToken } = require("../util/jwtUtility");
+import bcrypt from "bcryptjs";
+import { generateToken } from "../util/jwtUtility";
 
-const AWSFileUpload = require("../util/AWSUtility");
-const errorHandler = require("../util/errorHandler");
-const AWSDirectories = require("../util/constants");
+//TODO Carlos
+// import AWSFileUpload from "../util/AWSUtility";
+import errorHandler from "../util/errorHandler";
+import AWSDirectories from "../util/constants";
 
-const registerUser = async (req, res, next) => {
+const registerUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const { firstName, lastName, email, password, isAdmin } = req.body;
 
   try {
@@ -38,16 +44,22 @@ const registerUser = async (req, res, next) => {
       data: user,
     });
   } catch (error) {
-    next(errorHandler(error.message));
+    const { message } = error as Error;
+    next(errorHandler(message));
   }
 };
 
-const login = async (req, res, next) => {
+const login = async (req: Request, res: Response, next: NextFunction) => {
   const { email, password } = req.body;
 
   try {
     //Check if email exists, and check for valid password
     const user = await User.findOne({ email });
+
+    if (!user) {
+      return next(errorHandler("Wrong email or password"));
+    }
+
     const passwordMatched = await bcrypt.compare(password, user.password);
 
     if (!(user && passwordMatched)) {
@@ -61,15 +73,20 @@ const login = async (req, res, next) => {
         lastName: user.lastName,
         email: user.email,
         isAdmin: user.isAdmin,
-        token: generateToken(user._id),
+        token: generateToken(user.id),
       },
     });
   } catch (error) {
-    next(errorHandler(error.message));
+    const { message } = error as Error;
+    next(errorHandler(message));
   }
 };
 
-const getUserProfile = async (req, res, next) => {
+const getUserProfile = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     //Moved populate here from User model
     const user = await User.findById(req.authUserId).populate({
@@ -81,11 +98,12 @@ const getUserProfile = async (req, res, next) => {
       data: user,
     });
   } catch (error) {
-    next(errorHandler(error.message));
+    const { message } = error as Error;
+    next(errorHandler(message));
   }
 };
 
-const getAllUsers = async (_, res, next) => {
+const getAllUsers = async (_: Request, res: Response, next: NextFunction) => {
   try {
     const users = await User.find();
     res.json({
@@ -93,12 +111,17 @@ const getAllUsers = async (_, res, next) => {
       data: users,
     });
   } catch (error) {
-    next(errorHandler(error.message));
+    const { message } = error as Error;
+    next(errorHandler(message));
   }
 };
 
 //who viewed
-const getProfileViewers = async (req, res, next) => {
+const getProfileViewers = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     //1. Find the user who posted the blog entry (:id)
     const user = await User.findById(req.params.id);
@@ -127,11 +150,12 @@ const getProfileViewers = async (req, res, next) => {
       }
     }
   } catch (error) {
-    next(errorHandler(error.message));
+    const { message } = error as Error;
+    next(errorHandler(message));
   }
 };
 
-const follow = async (req, res, next) => {
+const follow = async (req: Request, res: Response, next: NextFunction) => {
   try {
     //1. Find user to follow
     const userToFollow = await User.findById(req.params.id);
@@ -163,11 +187,12 @@ const follow = async (req, res, next) => {
       }
     }
   } catch (error) {
-    next(errorHandler(error.message));
+    const { message } = error as Error;
+    next(errorHandler(message));
   }
 };
 
-const unfollow = async (req, res, next) => {
+const unfollow = async (req: Request, res: Response, next: NextFunction) => {
   try {
     //1. Find user to unfollow
     const userToUnfollow = await User.findById(req.params.id);
@@ -184,8 +209,12 @@ const unfollow = async (req, res, next) => {
 
       //5. If already following, remove
       if (isAlreadyFollowing) {
-        userToUnfollow.followers.pop(currentUser.id);
-        currentUser.following.pop(userToUnfollow.id);
+        userToUnfollow.followers = userToUnfollow.followers.filter(
+          (x) => x !== currentUser.id
+        );
+        currentUser.following = currentUser.following.filter(
+          (x) => x !== userToUnfollow.id
+        );
 
         await currentUser.save();
         await userToUnfollow.save();
@@ -199,11 +228,12 @@ const unfollow = async (req, res, next) => {
       }
     }
   } catch (error) {
-    next(errorHandler(error.message));
+    const { message } = error as Error;
+    next(errorHandler(message));
   }
 };
 
-const blockUser = async (req, res, next) => {
+const blockUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     //1. Find user to block
     const userToBlock = await User.findById(req.params.id);
@@ -223,7 +253,7 @@ const blockUser = async (req, res, next) => {
       if (isAlreadyBlocked) {
         return next(errorHandler("User is already blocked"));
       } else {
-        currentUser.blocked.push(userToBlock);
+        currentUser.blocked.push(userToBlock.id);
 
         await currentUser.save();
 
@@ -234,11 +264,12 @@ const blockUser = async (req, res, next) => {
       }
     }
   } catch (error) {
-    next(errorHandler(error.message));
+    const { message } = error as Error;
+    next(errorHandler(message));
   }
 };
 
-const unblockUser = async (req, res, next) => {
+const unblockUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     //1. Find user to block
     const userToUnblock = await User.findById(req.params.id);
@@ -256,7 +287,9 @@ const unblockUser = async (req, res, next) => {
 
       //5. If already blocked, unblock
       if (isAlreadyBlocked) {
-        currentUser.blocked.pop(userToUnblock);
+        currentUser.blocked = currentUser.blocked.filter(
+          (x) => x !== userToUnblock.id
+        );
 
         await currentUser.save();
 
@@ -269,11 +302,16 @@ const unblockUser = async (req, res, next) => {
       }
     }
   } catch (error) {
-    next(errorHandler(error.message));
+    const { message } = error as Error;
+    next(errorHandler(message));
   }
 };
 
-const adminBlockUser = async (req, res, next) => {
+const adminBlockUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     //1. Find user to block
     const userToBlock = await User.findById(req.params.id);
@@ -302,11 +340,16 @@ const adminBlockUser = async (req, res, next) => {
       }
     }
   } catch (error) {
-    next(errorHandler(error.message));
+    const { message } = error as Error;
+    next(errorHandler(message));
   }
 };
 
-const adminUnblockUser = async (req, res, next) => {
+const adminUnblockUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     //1. Find user to block
     const userToUnblock = await User.findById(req.params.id);
@@ -329,11 +372,12 @@ const adminUnblockUser = async (req, res, next) => {
       });
     }
   } catch (error) {
-    next(errorHandler(error.message));
+    const { message } = error as Error;
+    next(errorHandler(message));
   }
 };
 
-const updateUser = async (req, res, next) => {
+const updateUser = async (req: Request, res: Response, next: NextFunction) => {
   const { email, lastName, firstName } = req.body;
   try {
     // Check if new email is already used
@@ -359,11 +403,16 @@ const updateUser = async (req, res, next) => {
       data: user,
     });
   } catch (error) {
-    next(errorHandler(error.message));
+    const { message } = error as Error;
+    next(errorHandler(message));
   }
 };
 
-const updatePassword = async (req, res, next) => {
+const updatePassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const { password } = req.body;
 
   try {
@@ -386,60 +435,66 @@ const updatePassword = async (req, res, next) => {
       data: "Password updated",
     });
   } catch (error) {
-    next(errorHandler(error.message));
+    const { message } = error as Error;
+    next(errorHandler(message));
   }
 };
 
 //Profile Photo Upload
-const profilePhotoUpload = async (req, res, next) => {
-  try {
-    //1. Find user
-    const userToUpdate = await User.findById(req.authUserId);
+// const profilePhotoUpload = async (
+//   req: Request,
+//   res: Response,
+//   next: NextFunction
+// ) => {
+//   try {
+//     //1. Find user
+//     const userToUpdate = await User.findById(req.authUserId);
 
-    //2. Check if user is found
-    if (!userToUpdate) {
-      return next(errorHandler("User not found", 403));
-    }
+//     //2. Check if user is found
+//     if (!userToUpdate) {
+//       return next(errorHandler("User not found", 403));
+//     }
 
-    //3. Check if user is blocked
-    if (userToUpdate.isBlocked) {
-      return next(errorHandler("Action not allowed, account is blocked", 403));
-    }
+//     //3. Check if user is blocked
+//     if (userToUpdate.isBlocked) {
+//       return next(errorHandler("Action not allowed, account is blocked", 403));
+//     }
 
-    //4. Check if user is updating photo
-    if (req.file) {
-      //5. Update profile photo
-      //Upload to AWS
-      const uploadResponse = await AWSFileUpload(
-        req.file,
-        userToUpdate.id.toString(),
-        AWSDirectories.profilePhotos
-      );
+//     //4. Check if user is updating photo
+//     if (req.file) {
+//       //5. Update profile photo
+//       //Upload to AWS
+//       const uploadResponse = await AWSFileUpload(
+//         req.file,
+//         userToUpdate.id.toString(),
+//         AWSDirectories.profilePhotos
+//       );
 
-      //Update DB with picture location
-      await User.findByIdAndUpdate(
-        req.authUserId,
-        {
-          $set: {
-            profilePhoto: uploadResponse.Location,
-          },
-        },
-        { new: true }
-      );
+//       //Update DB with picture location
+//       await User.findByIdAndUpdate(
+//         req.authUserId,
+//         {
+//           $set: {
+//             profilePhoto: uploadResponse.Location,
+//           },
+//         },
+//         { new: true }
+//       );
 
-      res.json({
-        status: "sucess",
-        data: "Profile photo uploaded",
-      });
-    } else {
-      errorHandler(`Upload failed: ${uploadResponse.message}`, 500);
-    }
-  } catch (error) {
-    next(errorHandler(error.message));
-  }
-};
+//       res.json({
+//         status: "sucess",
+//         data: "Profile photo uploaded",
+//       });
+//     } else {
+//       errorHandler(`Upload failed: ${uploadResponse.message}`, 500);
+//     }
+//   } catch (error) {
+//     const { message } = error as Error;
+//     next(errorHandler(message));
+//   }
+// };
 
-const deleteUser = async (req, res, next) => {
+const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     await Post.deleteMany({ user: req.authUserId });
     await Comment.deleteMany({ user: req.authUserId });
@@ -451,11 +506,12 @@ const deleteUser = async (req, res, next) => {
       data: "User account deleted",
     });
   } catch (error) {
-    next(errorHandler(error.message));
+    const { message } = error as Error;
+    next(errorHandler(message));
   }
 };
 
-module.exports = {
+export {
   adminBlockUser,
   adminUnblockUser,
   blockUser,
@@ -465,7 +521,7 @@ module.exports = {
   getProfileViewers,
   getUserProfile,
   login,
-  profilePhotoUpload,
+  // profilePhotoUpload,
   registerUser,
   unblockUser,
   unfollow,

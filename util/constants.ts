@@ -1,6 +1,6 @@
-const AWSDirectories = {
+export const AWSDirectories = {
   profilePhotos: "profilePhotos/",
   postPhotos: "postPhotos/",
 };
 
-module.exports = AWSDirectories;
+export default AWSDirectories;

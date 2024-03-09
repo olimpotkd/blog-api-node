@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose, { Mongoose } from "mongoose";
 
 //create schema
 const postSchema = new mongoose.Schema(
@@ -74,28 +74,30 @@ postSchema.virtual("dislikesCount").get(function () {
 //Likes percentage
 postSchema.virtual("likesPercentage").get(function () {
   const post = this;
-  const sum = parseInt(post.likes.length) + parseInt(post.dislikes.length);
+  const sum: number = post.likes.length + post.dislikes.length;
   return (post.likes.length / sum) * 100;
 });
 //Dislikes percentage
 postSchema.virtual("dislikesPercentage").get(function () {
   const post = this;
-  const sum = parseInt(post.likes.length) + parseInt(post.dislikes.length);
+  const sum: number = post.likes.length + post.dislikes.length;
   return (post.dislikes.length / sum) * 100;
 });
+
+//TODO CARLOS
 //Days ago
-postSchema.virtual("daysAgo").get(function () {
-  const post = this;
-  const date = new Date(post.createdAt);
-  const daysAgo = Math.floor((Date.now() - date) / 86400000);
-  return daysAgo === 0
-    ? "Today"
-    : daysAgo === 1
-    ? "Yesterday"
-    : `${daysAgo} days ago`;
-});
+// postSchema.virtual("daysAgo").get(function () {
+//   const post = this;
+//   const date = new Date(post.createdAt);
+//   const daysAgo = Math.floor((Date.now() - date) / 86400000);
+//   return daysAgo === 0
+//     ? "Today"
+//     : daysAgo === 1
+//     ? "Yesterday"
+//     : `${daysAgo} days ago`;
+// });
 
 //Register the post model into mongoose/mongo
 const Post = mongoose.model("Post", postSchema);
 
-module.exports = Post;
+export default Post;

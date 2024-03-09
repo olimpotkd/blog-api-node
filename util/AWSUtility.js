@@ -1,4 +1,4 @@
-const AWS = require("aws-sdk");
+import AWS from "aws-sdk";
 
 /**
  * Uploads a picture file to AWS
@@ -31,4 +31,4 @@ const AWSFileUpload = (file, fileName, route) => {
   return s3.upload(uploadParams).promise();
 };
 
-module.exports = AWSFileUpload;
+export default AWSFileUpload;

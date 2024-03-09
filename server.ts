@@ -1,7 +1,7 @@
-import express, { Express, Request, Response } from "express";
+import express from "express";
 import dotenv from "dotenv";
 
-// import userRouter from "./routes/usersRoutes";
+import userRouter from "./routes/usersRoutes";
 // import postsRoutes from "./routes/postsRoutes";
 // import commentsRoutes from "./routes/commentsRoutes";
 // import categoriesRoutes from "./routes/categoriesRoutes";
@@ -12,7 +12,7 @@ dotenv.config();
 
 require("./config/dbConnect");
 
-const app: Express = express();
+const app = express();
 
 //middlewares
 app.use(express.json());
@@ -21,8 +21,8 @@ app.use(express.json());
 //routes
 //-------
 
-// //users route
-// app.use("/api/v1/users", userRouter);
+//users route
+app.use("/api/v1/users", userRouter);
 
 // //posts routes
 // app.use("/api/v1/posts", postsRoutes);
