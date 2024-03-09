@@ -5,9 +5,13 @@ import AWS from "aws-sdk";
  * @param {object} file File to be uploaded
  * @param {string} fileName Name of the file when uploaded
  * @param {string} route Directory where the file will be uploaded to
- * @returns {object}
+ * @returns {interface}
  */
-const AWSFileUpload = (file, fileName, route) => {
+const AWSFileUpload = (
+  file: Express.Multer.File,
+  fileName: string,
+  route: string
+): Promise<AWS.S3.ManagedUpload.SendData> => {
   const fileExtension = file.originalname.split(".")[1];
   const key = `${route}${fileName}.${fileExtension}`;
 
@@ -21,8 +25,8 @@ const AWSFileUpload = (file, fileName, route) => {
 
   const s3 = new AWS.S3();
 
-  const uploadParams = {
-    Bucket: process.env.BUCKET,
+  const uploadParams: AWS.S3.PutObjectRequest = {
+    Bucket: process.env.BUCKET as string,
     Key: key,
     Body: file.buffer,
     ContentType: file.mimetype,

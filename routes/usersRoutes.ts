@@ -6,7 +6,7 @@ import {
   deleteUser,
   updateUser,
   getAllUsers,
-  // profilePhotoUpload,
+  profilePhotoUpload,
   getProfileViewers,
   unfollow,
   follow,
@@ -18,14 +18,14 @@ import {
 } from "../controllers/usersController";
 import { isLoggedIn, isAdmin } from "../middlewares";
 
-// import multer from "multer";
+import multer from "multer";
 
-// const upload = multer({
-//   storage: multer.memoryStorage(),
-//   limits: {
-//     fileSize: 5 * 1024 * 1024, // limit file size to 5MB
-//   },
-// });
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024, // limit file size to 5MB
+  },
+});
 
 const usersRoutes = express.Router();
 
@@ -89,13 +89,13 @@ usersRoutes.get("/:id/profile-viewers", isLoggedIn, getProfileViewers);
 // /api/v1/users/:id
 usersRoutes.delete("/", isLoggedIn, deleteUser);
 
-//POST user profile
+// POST user profile
 // /api/v1/users/profile-photo-upload/
-// usersRoutes.post(
-//   "/profile-photo-upload",
-//   isLoggedIn,
-//   upload.single("profilePhoto") //Call middleware, using the name of the param that contains the file
-//   // profilePhotoUpload
-// );
+usersRoutes.post(
+  "/profile-photo-upload",
+  isLoggedIn,
+  upload.single("profilePhoto"), //Call middleware, using the name of the param that contains the file
+  profilePhotoUpload
+);
 
 export default usersRoutes;

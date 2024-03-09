@@ -7,8 +7,7 @@ import Category from "../model/Category";
 import bcrypt from "bcryptjs";
 import { generateToken } from "../util/jwtUtility";
 
-//TODO Carlos
-// import AWSFileUpload from "../util/AWSUtility";
+import AWSFileUpload from "../util/AWSUtility";
 import errorHandler from "../util/errorHandler";
 import AWSDirectories from "../util/constants";
 
@@ -44,8 +43,7 @@ const registerUser = async (
       data: user,
     });
   } catch (error) {
-    const { message } = error as Error;
-    next(errorHandler(message));
+    next(errorHandler(<Error | string>error));
   }
 };
 
@@ -77,8 +75,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
       },
     });
   } catch (error) {
-    const { message } = error as Error;
-    next(errorHandler(message));
+    next(errorHandler(<Error | string>error));
   }
 };
 
@@ -98,8 +95,7 @@ const getUserProfile = async (
       data: user,
     });
   } catch (error) {
-    const { message } = error as Error;
-    next(errorHandler(message));
+    next(errorHandler(<Error | string>error));
   }
 };
 
@@ -111,8 +107,7 @@ const getAllUsers = async (_: Request, res: Response, next: NextFunction) => {
       data: users,
     });
   } catch (error) {
-    const { message } = error as Error;
-    next(errorHandler(message));
+    next(errorHandler(<Error | string>error));
   }
 };
 
@@ -150,8 +145,7 @@ const getProfileViewers = async (
       }
     }
   } catch (error) {
-    const { message } = error as Error;
-    next(errorHandler(message));
+    next(errorHandler(<Error | string>error));
   }
 };
 
@@ -187,8 +181,7 @@ const follow = async (req: Request, res: Response, next: NextFunction) => {
       }
     }
   } catch (error) {
-    const { message } = error as Error;
-    next(errorHandler(message));
+    next(errorHandler(<Error | string>error));
   }
 };
 
@@ -228,8 +221,7 @@ const unfollow = async (req: Request, res: Response, next: NextFunction) => {
       }
     }
   } catch (error) {
-    const { message } = error as Error;
-    next(errorHandler(message));
+    next(errorHandler(<Error | string>error));
   }
 };
 
@@ -264,8 +256,7 @@ const blockUser = async (req: Request, res: Response, next: NextFunction) => {
       }
     }
   } catch (error) {
-    const { message } = error as Error;
-    next(errorHandler(message));
+    next(errorHandler(<Error | string>error));
   }
 };
 
@@ -302,8 +293,7 @@ const unblockUser = async (req: Request, res: Response, next: NextFunction) => {
       }
     }
   } catch (error) {
-    const { message } = error as Error;
-    next(errorHandler(message));
+    next(errorHandler(<Error | string>error));
   }
 };
 
@@ -340,8 +330,7 @@ const adminBlockUser = async (
       }
     }
   } catch (error) {
-    const { message } = error as Error;
-    next(errorHandler(message));
+    next(errorHandler(<Error | string>error));
   }
 };
 
@@ -372,8 +361,7 @@ const adminUnblockUser = async (
       });
     }
   } catch (error) {
-    const { message } = error as Error;
-    next(errorHandler(message));
+    next(errorHandler(<Error | string>error));
   }
 };
 
@@ -403,8 +391,7 @@ const updateUser = async (req: Request, res: Response, next: NextFunction) => {
       data: user,
     });
   } catch (error) {
-    const { message } = error as Error;
-    next(errorHandler(message));
+    next(errorHandler(<Error | string>error));
   }
 };
 
@@ -435,64 +422,67 @@ const updatePassword = async (
       data: "Password updated",
     });
   } catch (error) {
-    const { message } = error as Error;
-    next(errorHandler(message));
+    next(errorHandler(<Error | string>error));
   }
 };
 
 //Profile Photo Upload
-// const profilePhotoUpload = async (
-//   req: Request,
-//   res: Response,
-//   next: NextFunction
-// ) => {
-//   try {
-//     //1. Find user
-//     const userToUpdate = await User.findById(req.authUserId);
+const profilePhotoUpload = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    //1. Find user
+    const userToUpdate = await User.findById(req.authUserId);
 
-//     //2. Check if user is found
-//     if (!userToUpdate) {
-//       return next(errorHandler("User not found", 403));
-//     }
+    //2. Check if user is found
+    if (!userToUpdate) {
+      return next(errorHandler("User not found", 403));
+    }
 
-//     //3. Check if user is blocked
-//     if (userToUpdate.isBlocked) {
-//       return next(errorHandler("Action not allowed, account is blocked", 403));
-//     }
+    //3. Check if user is blocked
+    if (userToUpdate.isBlocked) {
+      return next(errorHandler("Action not allowed, account is blocked", 403));
+    }
 
-//     //4. Check if user is updating photo
-//     if (req.file) {
-//       //5. Update profile photo
-//       //Upload to AWS
-//       const uploadResponse = await AWSFileUpload(
-//         req.file,
-//         userToUpdate.id.toString(),
-//         AWSDirectories.profilePhotos
-//       );
+    //4. Check if user is updating photo
+    if (req.file) {
+      //5. Update profile photo
+      //Upload to AWS
+      const uploadResponse: AWS.S3.ManagedUpload.SendData | AWS.S3.Error =
+        await AWSFileUpload(
+          req.file,
+          userToUpdate.id.toString(),
+          AWSDirectories.profilePhotos
+        );
 
-//       //Update DB with picture location
-//       await User.findByIdAndUpdate(
-//         req.authUserId,
-//         {
-//           $set: {
-//             profilePhoto: uploadResponse.Location,
-//           },
-//         },
-//         { new: true }
-//       );
+      if (isSendData(uploadResponse)) {
+        //Update DB with picture location
+        await User.findByIdAndUpdate(
+          req.authUserId,
+          {
+            $set: {
+              profilePhoto: uploadResponse.Location,
+            },
+          },
+          { new: true }
+        );
 
-//       res.json({
-//         status: "sucess",
-//         data: "Profile photo uploaded",
-//       });
-//     } else {
-//       errorHandler(`Upload failed: ${uploadResponse.message}`, 500);
-//     }
-//   } catch (error) {
-//     const { message } = error as Error;
-//     next(errorHandler(message));
-//   }
-// };
+        res.json({
+          status: "sucess",
+          data: "Profile photo uploaded",
+        });
+      } else {
+        errorHandler(`Upload failed: ${uploadResponse.Message}`, 500);
+      }
+    } else {
+      errorHandler(`Upload failed: Missing file`, 500);
+    }
+  } catch (error) {
+    next(errorHandler(<Error | string>error));
+  }
+};
 
 const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -506,9 +496,14 @@ const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
       data: "User account deleted",
     });
   } catch (error) {
-    const { message } = error as Error;
-    next(errorHandler(message));
+    next(errorHandler(<Error | string>error));
   }
+};
+
+const isSendData = (
+  response: AWS.S3.ManagedUpload.SendData | AWS.S3.Error
+): response is AWS.S3.ManagedUpload.SendData => {
+  return (response as AWS.S3.ManagedUpload.SendData).Location !== undefined;
 };
 
 export {
@@ -521,7 +516,7 @@ export {
   getProfileViewers,
   getUserProfile,
   login,
-  // profilePhotoUpload,
+  profilePhotoUpload,
   registerUser,
   unblockUser,
   unfollow,
