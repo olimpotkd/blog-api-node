@@ -167,59 +167,70 @@ const getPost = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-// const deletePost = async (req: Request, res: Response, next: NextFunction) => {
-//   try {
-//     const post = await Post.findById(req.params.id);
+const deletePost = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const post = await Post.findById(req.params.id);
 
-//     if (post.user.toString() !== req.authUserId.toString()) {
-//       return next(errorHandler("Not allowed to delete post.", 403));
-//     }
+    if (!post) {
+      return next(errorHandler("Post not found.", 400));
+    }
 
-//     await Post.findByIdAndDelete(req.params.id);
+    if (post?.user.toString() !== req.authUserId) {
+      return next(errorHandler("Not allowed to delete post.", 403));
+    }
 
-//     res.json({
-//       status: "success",
-//       data: "Post deleted",
-//     });
-//   } catch (error) {
-//     next(errorHandler(<Error | string>error));
-//   }
-// };
+    await Post.findByIdAndDelete(req.params.id);
 
-// const updatePost = async (req: Request, res: Response, next: NextFunction) => {
-//   try {
-//     if (req.file) {
-//       await AWSFileUpload(req.file, postCreated.id, AWSDirectories.postPhotos);
-//     }
+    res.json({
+      status: "success",
+      data: "Post deleted",
+    });
+  } catch (error) {
+    next(errorHandler(<Error | string>error));
+  }
+};
 
-//     const updatedPost = await Post.findByIdAndUpdate(
-//       req.params.id,
-//       {
-//         title: req.body.title,
-//         description: req.body.description,
-//         category: req.body.category,
-//       },
-//       {
-//         new: true,
-//         runValidators: true,
-//       }
-//     );
+const updatePost = async (req: Request, res: Response, next: NextFunction) => {
+  const postId = req.params.id;
+  const {
+    title,
+    description,
+    category,
+  }: { title: string; description: string; category: string } = req.body;
 
-//     res.json({
-//       status: "success",
-//       data: updatedPost,
-//     });
-//   } catch (error) {
-//     next(errorHandler(<Error | string>error));
-//   }
-// };
+  try {
+    if (req.file) {
+      await AWSFileUpload(req.file, postId, AWSDirectories.postPhotos);
+    }
+
+    const updatedPost = await Post.findByIdAndUpdate(
+      postId,
+      {
+        title,
+        description,
+        category,
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    res.json({
+      status: "success",
+      data: updatedPost,
+    });
+  } catch (error) {
+    next(errorHandler(<Error | string>error));
+  }
+};
 
 export {
   createPost,
-  // deletePost,
+  deletePost,
   getAllPosts,
   getPost,
   toggleDislikePost,
   toggleLikePost,
-  // updatePost,
+  updatePost,
 };

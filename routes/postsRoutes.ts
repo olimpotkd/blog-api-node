@@ -3,9 +3,9 @@ import {
   createPost,
   getAllPosts,
   getPost,
-  // updatePost,
+  updatePost,
   toggleLikePost,
-  // deletePost,
+  deletePost,
   toggleDislikePost,
 } from "../controllers/postsController";
 import isLoggedIn from "../middlewares/isLoggedIn";
@@ -33,21 +33,21 @@ postsRoutes.post(
 // /api/v1/posts/
 postsRoutes.get("/", isLoggedIn, getAllPosts);
 
-// //GET post
-// // /api/v1/posts/:id
-// postsRoutes.get("/:id", isLoggedIn, getPost);
+//GET post
+// /api/v1/posts/:id
+postsRoutes.get("/:id", isLoggedIn, getPost);
 
-// //DELETE posts
-// // /api/v1/posts/:id
-// postsRoutes.delete("/:id", isLoggedIn, deletePost);
+//DELETE posts
+// /api/v1/posts/:id
+postsRoutes.delete("/:id", isLoggedIn, deletePost);
 
-// //UPDATE posts
-// postsRoutes.put("/:id", isLoggedIn, upload.single("photo"), updatePost);
+//UPDATE posts
+postsRoutes.put("/:id", isLoggedIn, upload.single("photo"), updatePost);
 
-// //Like a post
-// postsRoutes.put("/:id/likes", isLoggedIn, toggleLikePost);
+//Like a post
+postsRoutes.put("/:id/likes", isLoggedIn, toggleLikePost);
 
-// //Dislike post
-// postsRoutes.put("/:id/dislikes", isLoggedIn, toggleDislikePost);
+//Dislike post
+postsRoutes.put("/:id/dislikes", isLoggedIn, toggleDislikePost);
 
 export default postsRoutes;
