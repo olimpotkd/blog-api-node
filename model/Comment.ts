@@ -1,13 +1,14 @@
-import mongoose from "mongoose";
+import { Schema, model } from "mongoose";
+import { IComment } from "./interfaces";
 
-const commentSchema = new mongoose.Schema(
+const commentSchema = new Schema<IComment>(
   {
     post: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "Post",
       required: [true, "Post is required"],
     },
-    user: { type: Object, required: [true, "User is required"] },
+    user: { type: Schema.Types.ObjectId, required: [true, "User is required"] },
     text: {
       type: String,
       required: [true, "Comment text is required"],
@@ -17,6 +18,6 @@ const commentSchema = new mongoose.Schema(
 );
 
 //Register Comment model into mongoose/mongo
-const Comment = mongoose.model("Coment", commentSchema);
+const Comment = model<IComment>("Coment", commentSchema);
 
 export default Comment;

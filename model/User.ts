@@ -1,7 +1,8 @@
-import mongoose from "mongoose";
+import { ObjectId, Schema, model } from "mongoose";
+import { IUser } from "./interfaces/";
 
 //create schema
-const userSchema = new mongoose.Schema(
+const userSchema = new Schema<IUser>(
   {
     firstName: {
       type: String,
@@ -36,37 +37,37 @@ const userSchema = new mongoose.Schema(
     },
     viewers: [
       {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: "User",
       },
     ],
     followers: [
       {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: "User",
       },
     ],
     following: [
       {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: "User",
       },
     ],
     posts: [
       {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: "Post", //This allows for the populate method to fill this prop with data from the Post collection
       },
     ],
     comments: [
       {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: "Comment",
       },
     ],
     blocked: [
       {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: "User",
       },
     ],
@@ -179,6 +180,6 @@ userSchema.virtual("blockedcount").get(function () {
 });
 
 //Register the user model into mongoose/mongo
-const User = mongoose.model("User", userSchema);
+const User = model<IUser>("User", userSchema);
 
 export default User;

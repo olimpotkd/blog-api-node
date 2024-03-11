@@ -1,7 +1,8 @@
-import mongoose, { Mongoose } from "mongoose";
+import { ObjectId, Schema, model } from "mongoose";
+import { IPost } from "./interfaces";
 
 //create schema
-const postSchema = new mongoose.Schema(
+const postSchema = new Schema<IPost>(
   {
     title: {
       type: String,
@@ -13,36 +14,36 @@ const postSchema = new mongoose.Schema(
       required: [true, "Post Description is required"],
     },
     category: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "Category",
       required: [true, "Post category is required"],
     },
     viewers: [
       {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: "User",
       },
     ],
     likes: [
       {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: "User",
       },
     ],
     dislikes: [
       {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: "User",
       },
     ],
     comments: [
       {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: "Comment",
       },
     ],
     user: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "User",
       required: [true, "Author is required"],
     },
@@ -98,6 +99,6 @@ postSchema.virtual("dislikesPercentage").get(function () {
 // });
 
 //Register the post model into mongoose/mongo
-const Post = mongoose.model("Post", postSchema);
+const Post = model<IPost>("Post", postSchema);
 
 export default Post;

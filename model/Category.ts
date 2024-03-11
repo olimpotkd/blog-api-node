@@ -1,9 +1,10 @@
-import mongoose from "mongoose";
+import { Schema, model } from "mongoose";
+import { ICategory } from "./interfaces";
 
-const categorySchema = new mongoose.Schema(
+const categorySchema = new Schema<ICategory>(
   {
     user: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
@@ -15,6 +16,6 @@ const categorySchema = new mongoose.Schema(
 );
 
 //Register Category model into mongoose/mongo
-const Category = mongoose.model("Category", categorySchema);
+const Category = model<ICategory>("Category", categorySchema);
 
 export default Category;

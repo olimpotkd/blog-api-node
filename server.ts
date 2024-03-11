@@ -2,7 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 
 import userRouter from "./routes/usersRoutes";
-// import postsRoutes from "./routes/postsRoutes";
+import postsRoutes from "./routes/postsRoutes";
 // import commentsRoutes from "./routes/commentsRoutes";
 // import categoriesRoutes from "./routes/categoriesRoutes";
 import wrongURLErrorHandler from "./middlewares/wrongURLErrorHandler";
@@ -25,7 +25,7 @@ app.use(express.json());
 app.use("/api/v1/users", userRouter);
 
 // //posts routes
-// app.use("/api/v1/posts", postsRoutes);
+app.use("/api/v1/posts", postsRoutes);
 
 // //comments routes
 // app.use("/api/v1/comments", commentsRoutes);
