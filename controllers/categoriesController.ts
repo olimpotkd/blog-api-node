@@ -1,7 +1,12 @@
-const Category = require("../model/Category");
-const errorHandler = require("../util/errorHandler");
+import { Request, Response, NextFunction } from "express";
+import Category from "../model/Category";
+import errorHandler from "../util/errorHandler";
 
-const createCategory = async (req, res, next) => {
+const createCategory = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const { title } = req.body;
   try {
     const category = await Category.create({ title, user: req.authUserId });
@@ -10,11 +15,11 @@ const createCategory = async (req, res, next) => {
       data: category,
     });
   } catch (error) {
-    return next(errorHandler(error.message));
+    next(errorHandler((error as Error).message));
   }
 };
 
-const getCategory = async (req, res, next) => {
+const getCategory = async (req: Request, res: Response, next: NextFunction) => {
   const category = await Category.findById(req.params.id);
   try {
     res.json({
@@ -22,11 +27,15 @@ const getCategory = async (req, res, next) => {
       data: category,
     });
   } catch (error) {
-    return next(errorHandler(error.message));
+    next(errorHandler((error as Error).message));
   }
 };
 
-const getAllCategories = async (_, res, next) => {
+const getAllCategories = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const categories = await Category.find();
 
   try {
@@ -35,11 +44,15 @@ const getAllCategories = async (_, res, next) => {
       data: categories,
     });
   } catch (error) {
-    return next(errorHandler(error.message));
+    next(errorHandler((error as Error).message));
   }
 };
 
-const deleteCategory = async (req, res, next) => {
+const deleteCategory = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     await Category.findByIdAndDelete(req.params.id);
     res.json({
@@ -47,11 +60,15 @@ const deleteCategory = async (req, res, next) => {
       data: "Category deleted",
     });
   } catch (error) {
-    return next(errorHandler(error.message));
+    next(errorHandler((error as Error).message));
   }
 };
 
-const updateCategory = async (req, res, next) => {
+const updateCategory = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const category = await Category.findByIdAndUpdate(
     req.params.id,
     {
@@ -65,11 +82,11 @@ const updateCategory = async (req, res, next) => {
       data: category,
     });
   } catch (error) {
-    return next(errorHandler(error.message));
+    next(errorHandler((error as Error).message));
   }
 };
 
-module.exports = {
+export {
   createCategory,
   getAllCategories,
   getCategory,

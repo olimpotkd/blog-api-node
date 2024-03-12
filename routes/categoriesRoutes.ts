@@ -1,12 +1,12 @@
-const express = require("express");
-const {
+import express from "express";
+import {
   createCategory,
   getCategory,
   getAllCategories,
   deleteCategory,
   updateCategory,
-} = require("../controllers/categoriesController");
-const isLoggedIn = require("../middlewares/isLoggedIn");
+} from "../controllers/categoriesController";
+import isLoggedIn from "../middlewares/isLoggedIn";
 
 const categoriesRoutes = express.Router();
 
@@ -30,4 +30,4 @@ categoriesRoutes.delete("/:id", deleteCategory);
 // /api/v1/categories/:id
 categoriesRoutes.put("/:id", isLoggedIn, updateCategory);
 
-module.exports = categoriesRoutes;
+export default categoriesRoutes;

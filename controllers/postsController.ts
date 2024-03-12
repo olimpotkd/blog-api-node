@@ -52,7 +52,7 @@ const createPost = async (req: Request, res: Response, next: NextFunction) => {
       data: postCreated,
     });
   } catch (error) {
-    next(errorHandler(<Error | string>error));
+    next(errorHandler((error as Error).message));
   }
 };
 
@@ -86,7 +86,7 @@ const toggleLikePost = async (
       data: post,
     });
   } catch (error) {
-    next(errorHandler(<Error | string>error));
+    next(errorHandler((error as Error).message));
   }
 };
 
@@ -121,7 +121,7 @@ const toggleDislikePost = async (
       data: post,
     });
   } catch (error) {
-    next(errorHandler(<Error | string>error));
+    next(errorHandler((error as Error).message));
   }
 };
 
@@ -141,7 +141,7 @@ const getAllPosts = async (req: Request, res: Response, next: NextFunction) => {
       data: filterededPosts,
     });
   } catch (error) {
-    next(errorHandler(<Error | string>error));
+    next(errorHandler((error as Error).message));
   }
 };
 
@@ -163,7 +163,7 @@ const getPost = async (req: Request, res: Response, next: NextFunction) => {
       data: post,
     });
   } catch (error) {
-    next(errorHandler(<Error | string>error));
+    next(errorHandler((error as Error).message));
   }
 };
 
@@ -186,7 +186,7 @@ const deletePost = async (req: Request, res: Response, next: NextFunction) => {
       data: "Post deleted",
     });
   } catch (error) {
-    next(errorHandler(<Error | string>error));
+    next(errorHandler((error as Error).message));
   }
 };
 
@@ -221,7 +221,7 @@ const updatePost = async (req: Request, res: Response, next: NextFunction) => {
       data: updatedPost,
     });
   } catch (error) {
-    next(errorHandler(<Error | string>error));
+    next(errorHandler((error as Error).message));
   }
 };
 

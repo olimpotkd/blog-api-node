@@ -1,4 +1,4 @@
-import { ObjectId, Schema, model } from "mongoose";
+import { Schema, model } from "mongoose";
 import { IPost } from "./interfaces";
 
 //create schema

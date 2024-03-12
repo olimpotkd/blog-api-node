@@ -43,7 +43,7 @@ const registerUser = async (
       data: user,
     });
   } catch (error) {
-    next(errorHandler(<Error | string>error));
+    next(errorHandler((error as Error).message));
   }
 };
 
@@ -75,7 +75,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
       },
     });
   } catch (error) {
-    next(errorHandler(<Error | string>error));
+    next(errorHandler((error as Error).message));
   }
 };
 
@@ -95,7 +95,7 @@ const getUserProfile = async (
       data: user,
     });
   } catch (error) {
-    next(errorHandler(<Error | string>error));
+    next(errorHandler((error as Error).message));
   }
 };
 
@@ -107,7 +107,7 @@ const getAllUsers = async (_: Request, res: Response, next: NextFunction) => {
       data: users,
     });
   } catch (error) {
-    next(errorHandler(<Error | string>error));
+    next(errorHandler((error as Error).message));
   }
 };
 
@@ -145,7 +145,7 @@ const getProfileViewers = async (
       }
     }
   } catch (error) {
-    next(errorHandler(<Error | string>error));
+    next(errorHandler((error as Error).message));
   }
 };
 
@@ -156,6 +156,10 @@ const follow = async (req: Request, res: Response, next: NextFunction) => {
 
     //2. Get current user
     const currentUser = await User.findById(req.authUserId);
+
+    if (!currentUser || !userToFollow) {
+      return next(errorHandler("Invalid users", 400));
+    }
 
     //3. Check both
     if (currentUser && userToFollow) {
@@ -181,7 +185,7 @@ const follow = async (req: Request, res: Response, next: NextFunction) => {
       }
     }
   } catch (error) {
-    next(errorHandler(<Error | string>error));
+    next(errorHandler((error as Error).message));
   }
 };
 
@@ -221,7 +225,7 @@ const unfollow = async (req: Request, res: Response, next: NextFunction) => {
       }
     }
   } catch (error) {
-    next(errorHandler(<Error | string>error));
+    next(errorHandler((error as Error).message));
   }
 };
 
@@ -256,7 +260,7 @@ const blockUser = async (req: Request, res: Response, next: NextFunction) => {
       }
     }
   } catch (error) {
-    next(errorHandler(<Error | string>error));
+    next(errorHandler((error as Error).message));
   }
 };
 
@@ -293,7 +297,7 @@ const unblockUser = async (req: Request, res: Response, next: NextFunction) => {
       }
     }
   } catch (error) {
-    next(errorHandler(<Error | string>error));
+    next(errorHandler((error as Error).message));
   }
 };
 
@@ -330,7 +334,7 @@ const adminBlockUser = async (
       }
     }
   } catch (error) {
-    next(errorHandler(<Error | string>error));
+    next(errorHandler((error as Error).message));
   }
 };
 
@@ -361,7 +365,7 @@ const adminUnblockUser = async (
       });
     }
   } catch (error) {
-    next(errorHandler(<Error | string>error));
+    next(errorHandler((error as Error).message));
   }
 };
 
@@ -391,7 +395,7 @@ const updateUser = async (req: Request, res: Response, next: NextFunction) => {
       data: user,
     });
   } catch (error) {
-    next(errorHandler(<Error | string>error));
+    next(errorHandler((error as Error).message));
   }
 };
 
@@ -422,7 +426,7 @@ const updatePassword = async (
       data: "Password updated",
     });
   } catch (error) {
-    next(errorHandler(<Error | string>error));
+    next(errorHandler((error as Error).message));
   }
 };
 
@@ -480,7 +484,7 @@ const profilePhotoUpload = async (
       errorHandler(`Upload failed: Missing file`, 500);
     }
   } catch (error) {
-    next(errorHandler(<Error | string>error));
+    next(errorHandler((error as Error).message));
   }
 };
 
@@ -496,7 +500,7 @@ const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
       data: "User account deleted",
     });
   } catch (error) {
-    next(errorHandler(<Error | string>error));
+    next(errorHandler((error as Error).message));
   }
 };
 

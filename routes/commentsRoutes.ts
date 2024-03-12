@@ -1,11 +1,12 @@
-const express = require("express");
-const {
+import express from "express";
+import {
   createComment,
   getComment,
   getAllComments,
   deleteComment,
   updateComment,
-} = require("../controllers/commentsController");
+} from "../controllers/commentsController";
+import { isLoggedIn } from "../middlewares";
 
 const commentsRoutes = express.Router();
 
@@ -29,4 +30,4 @@ commentsRoutes.delete("/:id", isLoggedIn, deleteComment);
 // /api/v1/comments/:id
 commentsRoutes.put("/:id", isLoggedIn, updateComment);
 
-module.exports = commentsRoutes;
+export default commentsRoutes;

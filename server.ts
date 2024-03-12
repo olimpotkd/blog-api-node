@@ -3,8 +3,8 @@ import dotenv from "dotenv";
 
 import userRouter from "./routes/usersRoutes";
 import postsRoutes from "./routes/postsRoutes";
-// import commentsRoutes from "./routes/commentsRoutes";
-// import categoriesRoutes from "./routes/categoriesRoutes";
+import commentsRoutes from "./routes/commentsRoutes";
+import categoriesRoutes from "./routes/categoriesRoutes";
 import wrongURLErrorHandler from "./middlewares/wrongURLErrorHandler";
 
 //dotenv allows for use of the .env file
@@ -28,17 +28,17 @@ app.use("/api/v1/users", userRouter);
 app.use("/api/v1/posts", postsRoutes);
 
 // //comments routes
-// app.use("/api/v1/comments", commentsRoutes);
+app.use("/api/v1/comments", commentsRoutes);
 
 // //comments routes
-// app.use("/api/v1/categories", categoriesRoutes);
+app.use("/api/v1/categories", categoriesRoutes);
 
 //error handler middleware
 app.use(wrongURLErrorHandler);
 
 //404 error
 app.use("*", (req, res) => {
-  res.status(400).json({
+  res.status(404).json({
     message: `${req.originalUrl} - Route Not Found`,
   });
 });
