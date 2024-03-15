@@ -7,11 +7,11 @@ import {
   updateUser,
   getAllUsers,
   profilePhotoUpload,
-  getProfileViewers,
-  unfollow,
-  follow,
-  blockUser,
-  unblockUser,
+  // getProfileViewers,
+  // unfollow,
+  // follow,
+  // blockUser,
+  // unblockUser,
   adminBlockUser,
   adminUnblockUser,
   updatePassword,
@@ -59,19 +59,19 @@ usersRoutes.get("/", getAllUsers);
 
 //GET unfollow
 // /api/v1/users/:id/unfollow
-usersRoutes.get("/:id/unfollow", isLoggedIn, unfollow);
+// usersRoutes.get("/:id/unfollow", isLoggedIn, unfollow);
 
 //GET follow
 // /api/v1/users/:id/following
-usersRoutes.get("/:id/follow", isLoggedIn, follow);
+// usersRoutes.get("/:id/follow", isLoggedIn, follow);
 
 //GET block user
 // /api/v1/users/:id/block
-usersRoutes.get("/:id/block", isLoggedIn, blockUser);
+// usersRoutes.get("/:id/block", isLoggedIn, blockUser);
 
 //GET unblock user
 // /api/v1/users/:id/unblock
-usersRoutes.get("/:id/unblock", isLoggedIn, unblockUser);
+// usersRoutes.get("/:id/unblock", isLoggedIn, unblockUser);
 
 //PUT block user
 // /api/v1/users/:id/adminBlock
@@ -83,7 +83,7 @@ usersRoutes.put("/:id/adminUnblock", isLoggedIn, isAdmin, adminUnblockUser);
 
 //GET users
 // /api/v1/users/profile-viewers
-usersRoutes.get("/:id/profile-viewers", isLoggedIn, getProfileViewers);
+// usersRoutes.get("/:id/profile-viewers", isLoggedIn, getProfileViewers);
 
 //DELETE user
 // /api/v1/users/:id

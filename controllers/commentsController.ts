@@ -33,7 +33,7 @@ const createComment = async (
       data: comment,
     });
   } catch (error) {
-    next(errorHandler("Hey"));
+    next(errorHandler((error as Error).message));
   }
 };
 

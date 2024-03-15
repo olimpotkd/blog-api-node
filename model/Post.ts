@@ -85,18 +85,17 @@ postSchema.virtual("dislikesPercentage").get(function () {
   return (post.dislikes.length / sum) * 100;
 });
 
-//TODO CARLOS
 //Days ago
-// postSchema.virtual("daysAgo").get(function () {
-//   const post = this;
-//   const date = new Date(post.createdAt);
-//   const daysAgo = Math.floor((Date.now() - date) / 86400000);
-//   return daysAgo === 0
-//     ? "Today"
-//     : daysAgo === 1
-//     ? "Yesterday"
-//     : `${daysAgo} days ago`;
-// });
+postSchema.virtual("daysAgo").get(function () {
+  const post = this;
+  const date = new Date(<string>post.createdAt);
+  const daysAgo = Math.floor((Date.now() - date.getTime()) / 86400000);
+  return daysAgo === 0
+    ? "Today"
+    : daysAgo === 1
+    ? "Yesterday"
+    : `${daysAgo} days ago`;
+});
 
 //Register the post model into mongoose/mongo
 const Post = model<IPost>("Post", postSchema);

@@ -1,6 +1,7 @@
-import { Types } from "mongoose";
+import { Types, SchemaTimestampsConfig } from "mongoose";
 
-export default interface IPost {
+export default interface IPost extends Document, SchemaTimestampsConfig {
+  _id: Types.ObjectId;
   title: string;
   description: string;
   category: Types.ObjectId;

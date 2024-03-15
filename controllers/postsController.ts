@@ -4,8 +4,8 @@ import User from "../model/User";
 import AWSFileUpload from "../util/AWSUtility";
 import AWSDirectories from "../util/constants";
 import errorHandler from "../util/errorHandler";
-import mongoose, { Types } from "mongoose";
-import { IUser } from "../model/interfaces/";
+import { Types } from "mongoose";
+import { IUser } from "../model/interfaces";
 
 const createPost = async (req: Request, res: Response, next: NextFunction) => {
   const { title, description, category } = req.body;
@@ -69,7 +69,7 @@ const toggleLikePost = async (
     }
 
     if (
-      post?.likes.findIndex((like) => like.toString() === req.authUserId) >= 0 //Check if current user has already liked
+      post.likes.findIndex((like) => like.toString() === req.authUserId) >= 0 //Check if current user has already liked
     ) {
       post.likes = post.likes.filter((id) => id.toString() !== req.authUserId);
     } else {

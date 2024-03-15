@@ -1,5 +1,6 @@
-import { ObjectId, Schema, model } from "mongoose";
+import { Schema, model } from "mongoose";
 import { IUser } from "./interfaces/";
+import Post from "./Post";
 
 //create schema
 const userSchema = new Schema<IUser>(
@@ -95,55 +96,60 @@ userSchema.pre("findOne", async function (next) {
   //Populate will fill the "posts" properties with the data from the Post collection.
   //This will be done by mongoose, when the ref has been specified in the schema
   //This could also be called from the controller, but here it makes more sense.
-  //This is breaking, moved to profile controller
-  // await this.populate("posts");
 
-  // const userId = this._conditions._id;
-  // const posts = await Post.find({ user: userId });
-  // const lastPostDate = new Date(posts[posts.length - 1]?.createdAt);
-  // const lastPostDateStr = lastPostDate.toDateString();
-  // const currentDate = new Date();
-  // const diffDays = (currentDate - lastPostDate) / (1000 * 3600 * 24);
-  // // //------Last post date-------------
-  // userSchema.virtual("lastPostDate").get(function () {
-  //   return lastPostDateStr;
-  // });
-  // //------Block if inactive for 30 days -----
-  // await User.findByIdAndUpdate(
-  //   userId,
-  //   {
-  //     isBlocked: diffDays > 30,
-  //   },
-  //   {
-  //     new: true,
-  //   }
-  // );
-  // //-----Is Inactive---------
-  // userSchema.virtual("isInactive").get(() => {
-  //   return diffDays > 30; // If more than 30 days, is inactive
-  // });
-  //   // ----------Last Active---------
-  //   userSchema.virtual("lastActive").get(() => {
-  //     const lastActiveDays = Math.floor(diffDays);
-  //     if (lastActiveDays <= 0) {
-  //       return "Today";
-  //     } else if (lastActiveDays === 1) {
-  //       return "Yesterday";
-  //     } else {
-  //       return `${lastActiveDays} days ago`;
-  //     }
-  //   });
-  //   // -------Update userAwards based on number of posts--------
-  //   const numberOfPosts = posts.length;
-  //   const award =
-  //     numberOfPosts < 10 ? "Bronze" : numberOfPosts <= 20 ? "Silver" : "Gold";
-  //   await User.findByIdAndUpdate(
-  //     userId,
-  //     {
-  //       userAward: award,
-  //     },
-  //     { new: true }
-  //   );
+  const userId = <string>this.getFilter()._id;
+
+  const posts = await Post.find({ user: userId });
+
+  const latestPost = posts[posts.length - 1];
+  const lastPostDate = new Date(<string>latestPost?.createdAt);
+  const lastPostDateStr = lastPostDate.toDateString();
+  const currentDate = new Date();
+  const diffDays =
+    (currentDate.getTime() - lastPostDate.getTime()) / (1000 * 3600 * 24);
+
+  //------Last post date-------------
+  userSchema.virtual("lastPostDate").get(function () {
+    return lastPostDateStr;
+  });
+
+  //------Block if inactive for 30 days -----
+  await User.findByIdAndUpdate(
+    userId,
+    {
+      isBlocked: diffDays > 30,
+    },
+    {
+      new: true,
+    }
+  );
+
+  //-----Is Inactive---------
+  userSchema.virtual("isInactive").get(() => {
+    return diffDays > 30; // If more than 30 days, is inactive
+  });
+  // ----------Last Active---------
+  userSchema.virtual("lastActive").get(() => {
+    const lastActiveDays = Math.floor(diffDays);
+    if (lastActiveDays <= 0) {
+      return "Today";
+    } else if (lastActiveDays === 1) {
+      return "Yesterday";
+    } else {
+      return `${lastActiveDays} days ago`;
+    }
+  });
+  // -------Update userAwards based on number of posts--------
+  const numberOfPosts = posts.length;
+  const award =
+    numberOfPosts < 10 ? "Bronze" : numberOfPosts <= 20 ? "Silver" : "Gold";
+  await User.findByIdAndUpdate(
+    userId,
+    {
+      userAward: award,
+    },
+    { new: true }
+  );
   next();
 });
 

@@ -1,6 +1,7 @@
-import { Types } from "mongoose";
+import { Document, SchemaTimestampsConfig, Types } from "mongoose";
 
-export default interface IUser {
+export default interface IUser extends Document, SchemaTimestampsConfig {
+  _id: Types.ObjectId;
   firstName: string;
   lastName: string;
   profilePhoto?: string;

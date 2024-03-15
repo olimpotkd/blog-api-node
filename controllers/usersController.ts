@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction, Errback } from "express";
+import { Request, Response, NextFunction } from "express";
 import User from "../model/User";
 import Post from "../model/Post";
 import Comment from "../model/Comment";
@@ -10,6 +10,7 @@ import { generateToken } from "../util/jwtUtility";
 import AWSFileUpload from "../util/AWSUtility";
 import errorHandler from "../util/errorHandler";
 import AWSDirectories from "../util/constants";
+import { Types } from "mongoose";
 
 const registerUser = async (
   req: Request,
@@ -127,11 +128,7 @@ const getProfileViewers = async (
     //3. Check if user and currentUser are found
     if (user && currentUser) {
       //4. Check if currentUser already viewed the user's profile.
-      const isUserAlreadyViewed = user.viewers.some((viewer) => {
-        const viewerId = viewer.toString();
-        const currentUserId = currentUser.id.toString();
-        return currentUserId === viewerId;
-      });
+      const isUserAlreadyViewed = user.viewers.includes(currentUser._id);
 
       if (isUserAlreadyViewed) {
         return next(errorHandler("You already viewed this profile"));
@@ -164,16 +161,16 @@ const follow = async (req: Request, res: Response, next: NextFunction) => {
     //3. Check both
     if (currentUser && userToFollow) {
       //4. Check if user is already following
-      const isAlreadyFollowing = userToFollow.followers.some(
-        (follower) => follower.toString() === currentUser.id.toString()
+      const isAlreadyFollowing = userToFollow.followers.includes(
+        currentUser._id
       );
 
       //5. If not already following, add
       if (isAlreadyFollowing) {
         return next(errorHandler("You already follow this user"));
       } else {
-        userToFollow.followers.push(currentUser.id);
-        currentUser.following.push(userToFollow.id);
+        userToFollow.followers.push(currentUser._id);
+        currentUser.following.push(userToFollow._id);
 
         await currentUser.save();
         await userToFollow.save();
@@ -200,17 +197,17 @@ const unfollow = async (req: Request, res: Response, next: NextFunction) => {
     //3. Check both
     if (currentUser && userToUnfollow) {
       //4. Check if user is already following
-      const isAlreadyFollowing = userToUnfollow.followers.some(
-        (follower) => follower.toString() === currentUser.id.toString()
+      const isAlreadyFollowing = userToUnfollow.followers.includes(
+        currentUser._id
       );
 
       //5. If already following, remove
       if (isAlreadyFollowing) {
         userToUnfollow.followers = userToUnfollow.followers.filter(
-          (x) => x !== currentUser.id
+          (follower) => follower !== <Types.ObjectId>currentUser._id
         );
         currentUser.following = currentUser.following.filter(
-          (x) => x !== userToUnfollow.id
+          (following) => following !== userToUnfollow._id
         );
 
         await currentUser.save();
@@ -240,10 +237,7 @@ const blockUser = async (req: Request, res: Response, next: NextFunction) => {
     //3. Check both
     if (currentUser && userToBlock) {
       //4. Check if user is already blocked
-      const isAlreadyBlocked = currentUser.blocked.some(
-        (blockedUserId) =>
-          blockedUserId.toString() === userToBlock.id.toString()
-      );
+      const isAlreadyBlocked = currentUser.blocked.includes(userToBlock._id);
 
       //5. If not already blocked, block
       if (isAlreadyBlocked) {
@@ -275,15 +269,12 @@ const unblockUser = async (req: Request, res: Response, next: NextFunction) => {
     //3. Check both
     if (currentUser && userToUnblock) {
       //4. Check if user is already blocked
-      const isAlreadyBlocked = currentUser.blocked.some(
-        (blockedUserId) =>
-          blockedUserId.toString() === userToUnblock.id.toString()
-      );
+      const isAlreadyBlocked = currentUser.blocked.includes(userToUnblock._id);
 
       //5. If already blocked, unblock
       if (isAlreadyBlocked) {
         currentUser.blocked = currentUser.blocked.filter(
-          (x) => x !== userToUnblock.id
+          (blockedUser) => blockedUser !== userToUnblock.id
         );
 
         await currentUser.save();

@@ -1,7 +1,7 @@
 import express from "express";
 import {
   createPost,
-  getAllPosts,
+  // getAllPosts,
   getPost,
   updatePost,
   toggleLikePost,
@@ -31,7 +31,7 @@ postsRoutes.post(
 
 //GET posts
 // /api/v1/posts/
-postsRoutes.get("/", isLoggedIn, getAllPosts);
+// postsRoutes.get("/", isLoggedIn, getAllPosts);
 
 //GET post
 // /api/v1/posts/:id
